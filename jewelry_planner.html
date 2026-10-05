@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Jewelry Budget Planner - PocketSmart{% endblock %}
+{% block content %}
+<div class="planner-container">
+  <div class="planner-header" style="background:#0d9488;">
+    <h2><i class="fa-solid fa-gem"></i> Jewelry Budget & Styling Planner</h2>
+    <p>Get AI-powered jewelry recommendations tailored to your outfit image and occasion</p>
+  </div>
+  <div class="form-body">
+    <form id="jewelryForm">
+      <div class="form-section">
+        <h3><i class="fa-solid fa-indian-rupee-sign"></i> Budget & Occasion</h3>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Total Budget (INR ₹)</label>
+            <input type="number" id="total_budget" name="total_budget" class="form-control" value="15000" required>
+          </div>
+          <div class="form-group">
+            <label>Occasion</label>
+            <select id="occasion" name="occasion" class="form-control">
+              <option value="Wedding / Reception">Wedding / Reception</option>
+              <option value="Diwali / Festive">Diwali / Festive Celebration</option>
+              <option value="Cocktail / Evening Party">Cocktail / Evening Party</option>
+              <option value="Office / Formal Gathering">Office / Formal Gathering</option>
+              <option value="College Fest / Birthday">College Fest / Birthday</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Style Preferences (Optional)</label>
+          <input type="text" id="preferences" name="preferences" class="form-control" placeholder="e.g. Rose gold, Kundan, minimal silver, oxidized jewellery...">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3><i class="fa-solid fa-camera"></i> Upload Outfit Image (Multimodal AI)</h3>
+        <p style="font-size:0.85rem; color:#64748b; margin-bottom:0.75rem;">Upload a photo of your dress or saree. Gemini will analyze color palettes, necklines, and formality.</p>
+        <div class="form-group">
+          <input type="file" id="image" name="image" class="form-control" accept="image/*">
+        </div>
+        <div id="imagePreviewContainer" style="display:none; text-align:center; margin-top:1rem;">
+          <img id="imagePreview" src="" alt="Outfit preview" style="max-height:220px; border-radius:8px; border:1px solid #cbd5e1;">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="background:#0d9488; width:100%; font-size:1.05rem; padding:0.85rem;">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Get Style & Jewelry Recommendations
+      </button>
+    </form>
+
+    <div class="loader" id="loader">
+      <div class="spinner" style="border-top-color:#0d9488;"></div>
+      <p style="color:#64748b; font-weight:600;">Analyzing outfit palette and matching trusted jewelry brands...</p>
+    </div>
+
+    <div class="results-container" id="results" style="display:none;"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const imageInput = document.getElementById('image');
+imageInput.addEventListener('change', function() {
+  const file = this.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('imagePreview').src = e.target.result;
+      document.getElementById('imagePreviewContainer').style.display = 'block';
+    }
+    reader.readAsDataURL(file);
+  }
+});
+
+document.getElementById('jewelryForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const loader = document.getElementById('loader');
+  const resultsDiv = document.getElementById('results');
+  loader.style.display = 'block';
+  resultsDiv.style.display = 'none';
+
+  const formData = new FormData();
+  formData.append('total_budget', document.getElementById('total_budget').value);
+  formData.append('occasion', document.getElementById('occasion').value);
+  formData.append('preferences', document.getElementById('preferences').value);
+  
+  const file = imageInput.files[0];
+  if (file) {
+    formData.append('image', file);
+  }
+
+  try {
+    const res = await fetch('/api/jewelry-budget', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    renderJewelryResults(data);
+  } catch (err) {
+    alert("Error fetching recommendations: " + err);
+  } finally {
+    loader.style.display = 'none';
+    resultsDiv.style.display = 'block';
+  }
+});
+
+function renderJewelryResults(data) {
+  const container = document.getElementById('results');
+  let html = '';
+
+  if (data.outfit_analysis) {
+    html += `
+      <div class="form-section" style="background:#f0fdfa; border-color:#99f6e4;">
+        <h3 style="color:#0f766e;"><i class="fa-solid fa-palette"></i> Outfit Analysis</h3>
+        <p style="font-size:0.9rem; color:#115e59; margin-bottom:0.3rem;"><strong>Detected Palette:</strong> ${(data.outfit_analysis.colors || []).join(', ')}</p>
+        <p style="font-size:0.9rem; color:#115e59; margin-bottom:0.3rem;"><strong>Style:</strong> ${data.outfit_analysis.style || 'Contemporary'}</p>
+        <p style="font-size:0.9rem; color:#115e59;"><strong>Formality:</strong> ${data.outfit_analysis.formality || 'Festive'}</p>
+      </div>
+    `;
+  }
+
+  html += `
+    <div class="budget-summary-banner" style="background:#0d9488;">
+      <div>
+        <h3 style="font-size:1.15rem;">Jewelry Budget Summary</h3>
+        <p style="font-size:0.9rem; color:#ccfbf1;">Budget: ₹${data.total_budget?.toLocaleString('en-IN')}</p>
+      </div>
+      <div style="text-align:right;">
+        <span style="font-size:0.85rem; color:#ccfbf1;">Remaining Buffer</span>
+        <h3 style="font-size:1.25rem; color:#bef264;">₹${(data.remaining_budget || 0).toLocaleString('en-IN')}</h3>
+      </div>
+    </div>
+  `;
+
+  if (data.jewelry_recommendations && data.jewelry_recommendations.length > 0) {
+    html += `
+      <div class="rec-category-box">
+        <div class="rec-category-title" style="background:#f0fdfa;">
+          <span><i class="fa-solid fa-gem"></i> Curated Jewelry Pieces</span>
+        </div>
+        <table class="item-table">
+          <thead>
+            <tr>
+              <th>Piece & Style</th>
+              <th>Category</th>
+              <th>Est. Price</th>
+              <th>Shop Online</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+    data.jewelry_recommendations.forEach(it => {
+      let linksHtml = '';
+      if (it.shopping_links) {
+        for (const [store, link] of Object.entries(it.shopping_links)) {
+          linksHtml += `<a href="${link}" target="_blank" class="tag-badge"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${store}</a>`;
+        }
+      }
+      html += `
+        <tr>
+          <td>
+            <strong>${it.name}</strong><br>
+            <span style="color:#64748b; font-size:0.85rem;">${it.description}</span>
+          </td>
+          <td><span style="background:#e0f2fe; color:#0369a1; padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem;">${it.item_type || 'Jewelry'}</span></td>
+          <td>₹${it.estimated_price?.toLocaleString('en-IN')}</td>
+          <td>${linksHtml}</td>
+        </tr>
+      `;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  if (data.styling_tips && data.styling_tips.length > 0) {
+    html += `
+      <div class="form-section" style="background:#fffbeb; border-color:#fde68a;">
+        <h3 style="color:#b45309;"><i class="fa-solid fa-wand-magic-sparkles"></i> Stylist Tips</h3>
+        <ul style="padding-left:1.25rem; color:#92400e; line-height:1.6; font-size:0.9rem;">
+          ${data.styling_tips.map(s => `<li>${s}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+</script>
+{% endblock %}

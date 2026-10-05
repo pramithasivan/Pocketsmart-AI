@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PocketSmart - AI Budget & Recommendation Assistant{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="logo"><i class="fa-solid fa-wallet"></i> Pocket<span>Smart</span></a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/home-planner">Home Planner</a>
+      <a href="/party-planner">Party Planner</a>
+      <a href="/jewelry-planner">Jewelry Planner</a>
+      {% if user %}
+        <a href="/dashboard">Dashboard</a>
+        <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+        <a href="/logout" class="btn btn-outline" style="padding:0.4rem 0.9rem; font-size:0.85rem;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      {% else %}
+        <a href="/login">Sign In</a>
+        <a href="/register" class="btn btn-primary" style="padding:0.4rem 1rem; font-size:0.85rem;">Get Started</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  {% block content %}{% endblock %}
+
+  <footer>
+    <p>&copy; 2025 PocketSmart AI. Built for Smart Budget Planning & Personalized Recommendations.</p>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

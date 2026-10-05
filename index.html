@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}PocketSmart - AI-Powered Budget Planning{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>PocketSmart</h1>
+  <p>AI-Powered Budget Planning for Everyday Needs. Make smarter financial decisions with personalized budget allocations and curated Indian shopping recommendations.</p>
+  <div style="display:flex; justify-content:center; gap:1rem;">
+    {% if user %}
+      <a href="/dashboard" class="btn btn-primary"><i class="fa-solid fa-gauge"></i> Go to Dashboard</a>
+    {% else %}
+      <a href="/register" class="btn btn-primary">Get Started</a>
+      <a href="/login" class="btn btn-outline">Sign In</a>
+    {% endif %}
+  </div>
+</section>
+
+<div class="main-container">
+  <div style="text-align:center; margin-bottom: 2rem;">
+    <h2 style="font-size:2rem; color:#1e293b; margin-bottom:0.5rem;">Our Smart Budget Planners</h2>
+    <p style="color:#64748b;">Discover how PocketSmart AI assists you across everyday life scenarios</p>
+  </div>
+
+  <div class="cards-grid">
+    <div class="feature-card">
+      <div class="feature-card-header"><i class="fa-solid fa-couch"></i></div>
+      <div class="feature-card-body">
+        <h3>Home Interior Budget Planner</h3>
+        <p>Get personalized recommendations for lighting, ceiling fans, furniture and decor that fit your style preferences and INR budget constraints.</p>
+        <a href="/home-planner" class="btn btn-primary" style="text-align:center;">Launch Home Planner</a>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-card-header" style="background:#0284c7;"><i class="fa-solid fa-champagne-glasses"></i></div>
+      <div class="feature-card-body">
+        <h3>Party Budget Planner</h3>
+        <p>Plan your celebrations with smart cost allocations across catering, venue, decorations, and entertainment without overspending.</p>
+        <a href="/party-planner" class="btn btn-primary" style="background:#0284c7; text-align:center;">Launch Party Planner</a>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-card-header" style="background:#0d9488;"><i class="fa-solid fa-gem"></i></div>
+      <div class="feature-card-body">
+        <h3>Jewelry Budget Planner</h3>
+        <p>Upload your outfit photo or enter occasion details to find matching jewelry styles with direct buy links across trusted Indian brands.</p>
+        <a href="/jewelry-planner" class="btn btn-primary" style="background:#0d9488; text-align:center;">Launch Jewelry Planner</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

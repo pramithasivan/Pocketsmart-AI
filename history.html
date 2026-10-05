@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Recommendation History - PocketSmart{% endblock %}
+{% block content %}
+<div class="main-container" style="max-width:900px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+    <h2 style="color:#1e3a5f;"><i class="fa-solid fa-clock-rotate-left"></i> Your Recommendation History</h2>
+    <a href="/dashboard" class="btn btn-outline" style="color:#2563eb; border-color:#2563eb; font-size:0.85rem;">Back to Dashboard</a>
+  </div>
+
+  {% if history and history|length > 0 %}
+    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+      {% for item in history %}
+        <div style="background:white; border-radius:10px; border:1px solid #e2e8f0; padding:1.25rem; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:0.75rem; margin-bottom:0.75rem;">
+            <div>
+              <span style="background:#2563eb; color:white; font-size:0.75rem; font-weight:700; padding:0.25rem 0.6rem; border-radius:4px; text-transform:uppercase;">{{ item.type }}</span>
+              <strong style="margin-left:0.5rem; font-size:1rem; color:#1e293b;">{{ item.input_summary }}</strong>
+            </div>
+            <span style="font-size:0.8rem; color:#94a3b8;">{{ item.timestamp }}</span>
+          </div>
+          <div style="font-size:0.9rem; color:#475569;">
+            <p><strong>Total Budget:</strong> ₹{{ item.full_result.total_budget }}</p>
+            <p><strong>Remaining / Buffer:</strong> ₹{{ item.full_result.remaining_budget }}</p>
+            {% if item.full_result.additional_suggestions %}
+              <div style="margin-top:0.5rem; font-size:0.85rem; color:#0284c7;">
+                <strong>Top Suggestion:</strong> {{ item.full_result.additional_suggestions[0] }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="text-align:center; padding:3rem 1.5rem; background:white; border-radius:12px; border:1px solid #e2e8f0;">
+      <i class="fa-solid fa-box-open" style="font-size:3rem; color:#cbd5e1; margin-bottom:1rem;"></i>
+      <h3 style="color:#64748b; margin-bottom:0.5rem;">No History Records Found</h3>
+      <p style="color:#94a3b8; font-size:0.95rem; margin-bottom:1.5rem;">Generate home, party or jewelry recommendations to see them saved here.</p>
+      <a href="/home-planner" class="btn btn-primary">Try Home Planner</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

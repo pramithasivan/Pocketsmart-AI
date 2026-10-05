@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Party & Event Budget Planner - PocketSmart{% endblock %}
+{% block content %}
+<div class="planner-container">
+  <div class="planner-header" style="background:#0284c7;">
+    <h2><i class="fa-solid fa-champagne-glasses"></i> Party Budget Planner</h2>
+    <p>Plan catering, decorations, and entertainment with smart budget control</p>
+  </div>
+  <div class="form-body">
+    <form id="partyForm">
+      <div class="form-section">
+        <h3><i class="fa-solid fa-circle-info"></i> Event Information</h3>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Total Budget (INR ₹)</label>
+            <input type="number" id="total_budget" class="form-control" value="25000" required>
+          </div>
+          <div class="form-group">
+            <label>Number of Guests</label>
+            <input type="number" id="num_guests" class="form-control" value="15" min="1" required>
+          </div>
+          <div class="form-group">
+            <label>Party Type</label>
+            <select id="party_type" class="form-control">
+              <option value="Birthday Party">Birthday Party</option>
+              <option value="Anniversary Celebration">Anniversary Celebration</option>
+              <option value="Casual Dinner / Get-together">Casual Dinner / Get-together</option>
+              <option value="Housewarming Party">Housewarming Party</option>
+              <option value="Farewell Party">Farewell Party</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Venue Preference</label>
+            <input type="text" id="venue_type" class="form-control" value="Home / Terrace" placeholder="e.g. Home, Rooftop, Banquet Hall">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3><i class="fa-solid fa-list-check"></i> Services Needed</h3>
+        <div class="checkbox-group">
+          <label class="checkbox-label"><input type="checkbox" id="needs_catering" checked> Catering & Food</label>
+          <label class="checkbox-label"><input type="checkbox" id="needs_decoration" checked> Decorations</label>
+          <label class="checkbox-label"><input type="checkbox" id="needs_entertainment" checked> Music & Entertainment</label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3><i class="fa-solid fa-comment-dots"></i> Special Requirements / Theme</h3>
+        <div class="form-group">
+          <textarea id="additional_requirements" class="form-control" rows="2" placeholder="e.g. Vegetarian only, retro theme, fairy lights, board games..."></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="background:#0284c7; width:100%; font-size:1.05rem; padding:0.85rem;">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Event Budget Plan
+      </button>
+    </form>
+
+    <div class="loader" id="loader">
+      <div class="spinner" style="border-top-color:#0284c7;"></div>
+      <p style="color:#64748b; font-weight:600;">PocketSmart AI is optimizing costs across food, decor & music...</p>
+    </div>
+
+    <div class="results-container" id="results" style="display:none;"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('partyForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const loader = document.getElementById('loader');
+  const resultsDiv = document.getElementById('results');
+  loader.style.display = 'block';
+  resultsDiv.style.display = 'none';
+
+  const payload = {
+    total_budget: parseFloat(document.getElementById('total_budget').value),
+    party_type: document.getElementById('party_type').value,
+    num_guests: parseInt(document.getElementById('num_guests').value),
+    venue_type: document.getElementById('venue_type').value || "Home",
+    needs_catering: document.getElementById('needs_catering').checked,
+    needs_decoration: document.getElementById('needs_decoration').checked,
+    needs_entertainment: document.getElementById('needs_entertainment').checked,
+    additional_requirements: document.getElementById('additional_requirements').value || "None"
+  };
+
+  try {
+    const res = await fetch('/api/party-budget', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    renderPartyResults(data);
+  } catch (err) {
+    alert("Error fetching recommendations: " + err);
+  } finally {
+    loader.style.display = 'none';
+    resultsDiv.style.display = 'block';
+  }
+});
+
+function renderPartyResults(data) {
+  const container = document.getElementById('results');
+  let html = `
+    <div class="budget-summary-banner" style="background:#0284c7;">
+      <div>
+        <h3 style="font-size:1.15rem;">Party Budget Summary</h3>
+        <p style="font-size:0.9rem; color:#e0f2fe;">Budget Cap: ₹${data.total_budget?.toLocaleString('en-IN')}</p>
+      </div>
+      <div style="text-align:right;">
+        <span style="font-size:0.85rem; color:#e0f2fe;">Contingency / Leftover</span>
+        <h3 style="font-size:1.25rem; color:#bef264;">₹${(data.remaining_budget || 0).toLocaleString('en-IN')}</h3>
+      </div>
+    </div>
+  `;
+
+  if (data.budget_breakdown) {
+    data.budget_breakdown.forEach(cat => {
+      html += `
+        <div class="rec-category-box">
+          <div class="rec-category-title" style="background:#f0f9ff;">
+            <span><i class="fa-solid fa-cake-candles"></i> ${cat.category}</span>
+            <span>Est: ₹${cat.allocation?.toLocaleString('en-IN')}</span>
+          </div>
+          <table class="item-table">
+            <thead>
+              <tr>
+                <th>Item / Service</th>
+                <th>Quantity</th>
+                <th>Price (INR)</th>
+                <th>Shopping / Booking Links</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      (cat.items || []).forEach(it => {
+        let linksHtml = '';
+        if (it.shopping_links) {
+          for (const [store, link] of Object.entries(it.shopping_links)) {
+            linksHtml += `<a href="${link}" target="_blank" class="tag-badge"><i class="fa-solid fa-arrow-up-right-from-square"></i> ${store}</a>`;
+          }
+        }
+        html += `
+          <tr>
+            <td>
+              <strong>${it.name}</strong><br>
+              <span style="color:#64748b; font-size:0.85rem;">${it.description}</span>
+            </td>
+            <td>${it.quantity}</td>
+            <td>₹${it.estimated_price?.toLocaleString('en-IN')}</td>
+            <td>${linksHtml}</td>
+          </tr>
+        `;
+      });
+      html += `</tbody></table></div>`;
+    });
+  }
+
+  if (data.venue_suggestions && data.venue_suggestions.length > 0) {
+    html += `
+      <div class="rec-category-box">
+        <div class="rec-category-title" style="background:#fdf4ff;">
+          <span><i class="fa-solid fa-location-dot"></i> Venue Suggestions</span>
+        </div>
+        <div style="padding:1rem;">
+          ${data.venue_suggestions.map(v => `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <div><strong>${v.name}</strong> (${v.type}) - Cap: ${v.capacity} guests</div>
+              <a href="https://www.google.com/search?q=${encodeURIComponent(v.search_terms || v.name)}" target="_blank" class="tag-badge">Explore on Google</a>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  if (data.additional_suggestions && data.additional_suggestions.length > 0) {
+    html += `
+      <div class="form-section" style="background:#ecfdf5; border-color:#a7f3d0;">
+        <h3 style="color:#047857;"><i class="fa-solid fa-lightbulb"></i> Event Host Tips</h3>
+        <ul style="padding-left:1.25rem; color:#065f46; line-height:1.6; font-size:0.9rem;">
+          ${data.additional_suggestions.map(s => `<li>${s}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+</script>
+{% endblock %}

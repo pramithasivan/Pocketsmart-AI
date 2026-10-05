@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - PocketSmart{% endblock %}
+{% block content %}
+<section class="hero" style="padding: 2.5rem 1.5rem;">
+  <h1>Welcome, {{ user.username }}!</h1>
+  <p>Choose an AI budget planner to begin your personalized financial and shopping plan.</p>
+</section>
+
+<div class="main-container">
+  <div class="cards-grid">
+    <div class="feature-card">
+      <div class="feature-card-header"><i class="fa-solid fa-couch"></i></div>
+      <div class="feature-card-body">
+        <h3>Home Interior Budget</h3>
+        <p>Plan lighting, fans, dining sets and decor with live links to Amazon, Flipkart, and IKEA.</p>
+        <a href="/home-planner" class="btn btn-primary">Start Planning</a>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-card-header" style="background:#0284c7;"><i class="fa-solid fa-champagne-glasses"></i></div>
+      <div class="feature-card-body">
+        <h3>Party & Event Budget</h3>
+        <p>Allocate catering, decoration, venue and music for birthdays, weddings, or dinners.</p>
+        <a href="/party-planner" class="btn btn-primary" style="background:#0284c7;">Start Planning</a>
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-card-header" style="background:#0d9488;"><i class="fa-solid fa-gem"></i></div>
+      <div class="feature-card-body">
+        <h3>Jewelry & Outfit Styling</h3>
+        <p>Upload dress photos or pick occasions to get smart jewelry matching recommendations.</p>
+        <a href="/jewelry-planner" class="btn btn-primary" style="background:#0d9488;">Start Planning</a>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:white; border-radius:12px; border:1px solid #e2e8f0; padding:1.5rem; margin-top:2rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <h3 style="color:#1e3a5f;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
+      <a href="/history" class="btn btn-outline" style="color:#2563eb; border-color:#2563eb; font-size:0.85rem; padding:0.4rem 0.8rem;">View All History</a>
+    </div>
+    {% if recent_history %}
+      <div style="display:flex; flex-direction:column; gap:0.75rem;">
+        {% for item in recent_history %}
+          <div style="padding:1rem; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong>{{ item.type }}</strong>
+              <div style="font-size:0.85rem; color:#64748b;">{{ item.input_summary }}</div>
+            </div>
+            <span style="font-size:0.8rem; color:#94a3b8;">{{ item.timestamp }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color:#64748b; font-size:0.95rem;">No budget plans generated yet. Pick a planner above to get started!</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

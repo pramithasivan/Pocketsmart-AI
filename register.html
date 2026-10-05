@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Register - PocketSmart{% endblock %}
+{% block content %}
+<div class="planner-container" style="max-width:460px; margin-top:3.5rem;">
+  <div class="planner-header">
+    <h2>Create Your Account</h2>
+    <p>Get personalized AI budget planning in seconds</p>
+  </div>
+  <div class="form-body">
+    {% if error %}
+      <div style="background:#fee2e2; border:1px solid #ef4444; color:#b91c1c; padding:0.75rem; border-radius:6px; margin-bottom:1rem; font-size:0.9rem;">
+        {{ error }}
+      </div>
+    {% endif %}
+    <form action="/register" method="POST">
+      <div class="form-group">
+        <label for="username"><i class="fa-solid fa-user"></i> Username</label>
+        <input type="text" id="username" name="username" class="form-control" placeholder="Choose a username" required>
+      </div>
+      <div class="form-group">
+        <label for="email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+      </div>
+      <div class="form-group">
+        <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Create a strong password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirm_password"><i class="fa-solid fa-shield-halved"></i> Confirm Password</label>
+        <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Confirm your password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;"><i class="fa-solid fa-user-plus"></i> Create Account</button>
+    </form>
+    <p style="text-align:center; font-size:0.85rem; color:#64748b; margin-top:1.5rem;">
+      Already have an account? <a href="/login" style="color:#2563eb; font-weight:600;">Sign In</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
